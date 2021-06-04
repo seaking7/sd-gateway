@@ -1,0 +1,49 @@
+
+server:
+  port: 8000
+
+eureka:
+  instance:
+    hostname: localhost  # PC hosts 파일 문제
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+spring:
+  application:
+    name: apigateway-service
+  cloud:
+    gateway:
+      routes:
+        - id: content-service
+          uri: lb://CONTENT-SERVICE
+          predicates:
+            - Path=/content-service/**
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/content-service/(?<segment>.*), /$\{segment}    # /content-service 부분 빼서 포워딩
+#            - AuthorizationHeaderFilter
+        - id: execute-service
+          uri: lb://EXECUTE-SERVICE
+          predicates:
+            - Path=/execute-service/**
+          filters:
+#            - RemoveRequestHeader=Cookie
+#            - RewritePath=/execute-service/(?<segment>.*), /$\{segment}    # /execute-service 부분 빼서 포워딩
+        - id: report-service
+          uri: lb://REPORT-SERVICE
+          predicates:
+            - Path=/report-service/**
+          filters:
+#            - RemoveRequestHeader=Cookie
+#            - RewritePath=/report-service/(?<segment>.*), /$\{segment}    # /report-service 부분 빼서 포워딩
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/**
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}    # /user-service 부분 빼서 포워딩
